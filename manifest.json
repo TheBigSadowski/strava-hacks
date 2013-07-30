@@ -6,6 +6,7 @@
 
 	"content_scripts": [{
 		"matches": ["http://www.strava.com/segments/*", "http://app.strava.com/segments/*"],
+		"css": ["style.css"],
 		"js": ["jquery.js", "underscore.js", "init.js"]
 	}],
 

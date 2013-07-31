@@ -1,6 +1,6 @@
 var searchForSegments = function(bounds, callback) {
 	//TODO: add segment type recognition
-	var url = '/api/v3/segments/search?bounds='+bounds.lat.min+'%2C'+bounds.lng.min+'%2C'+bounds.lat.max+'%2C'+bounds.lng.max+'&zoom=15&min_cat=0&max_cat=5&activity_type=cycling';
+	var url = '/api/v3/segments/search?bounds='+bounds.lat.min+'%2C'+bounds.lng.min+'%2C'+bounds.lat.max+'%2C'+bounds.lng.max+'&min_cat=0&max_cat=5&activity_type=cycling';
 	http.get(url, function(res) {
 		res.body = '';
 		res.setEncoding('utf8');

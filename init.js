@@ -30,7 +30,7 @@ var getExploreUrl = function(bounds) {
 	var lng = (bounds.lng.max+bounds.lng.min)/2;
 	var location = $('.location:first').text();
 	var zoom = getBoundsZoomLevel(bounds, { width: 918, height: 618 });
-	return '/segments/explore#location/'+encodeURIComponent(location)+'/type/cycling/min/0/max/5/surface/undefined/center/'+lat+','+lng+'/zoom/'+zoom+'/map_type/terrain'
+	return '/segments/explore#location/'+escape(location).replace('%2C', ',')+'/type/cycling/min/0/max/5/surface/undefined/center/'+lat+','+lng+'/zoom/'+zoom+'/map_type/terrain'
 };
 
 function getBoundsZoomLevel(bounds, mapDim) {

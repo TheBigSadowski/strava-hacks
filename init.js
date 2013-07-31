@@ -1,5 +1,3 @@
-//var id = $('.starred:first').data('segment-id');
-
 var searchForSegments = function(bounds, callback) {
 	//TODO: add segment type recognition
 	var url = '/api/v3/segments/search?bounds='+bounds.lat.min+'%2C'+bounds.lng.min+'%2C'+bounds.lat.max+'%2C'+bounds.lng.max+'&zoom=15&min_cat=0&max_cat=5&activity_type=cycling';
@@ -27,13 +25,58 @@ var formatSegment = function(s) {
 		'</li>'; 
 };
 
-var formatModule = function(segments) {
+var getExploreUrl = function(bounds) {
+	var lat = (bounds.lat.max+bounds.lat.min)/2;
+	var lng = (bounds.lng.max+bounds.lng.min)/2;
+	var location = $('.location:first').text();
+	var zoom = getBoundsZoomLevel(bounds, { width: 918, height: 618 });
+	return '/segments/explore#location/'+encodeURIComponent(location)+'/type/cycling/min/0/max/5/surface/undefined/center/'+lat+','+lng+'/zoom/'+zoom+'/map_type/terrain'
+};
+
+var getZoom = function(bounds) {
+	var GLOBE_WIDTH = 256; // a constant in Google's map projection
+	var west = bounds.lng.min;
+	var east = bounds.lng.max;
+	var angle = east - west;
+	if (angle < 0) {
+	  angle += 360;
+	}
+	return Math.round(Math.log(72 * 360 / angle / GLOBE_WIDTH) / Math.LN2);
+}
+
+function getBoundsZoomLevel(bounds, mapDim) {
+    var WORLD_DIM = { height: 256, width: 256 };
+    var ZOOM_MAX = 21;
+
+    function latRad(lat) {
+        var sin = Math.sin(lat * Math.PI / 180);
+        var radX2 = Math.log((1 + sin) / (1 - sin)) / 2;
+        return Math.max(Math.min(radX2, Math.PI), -Math.PI) / 2;
+    }
+
+    function zoom(mapPx, worldPx, fraction) {
+        return Math.floor(Math.log(mapPx / worldPx / fraction) / Math.LN2);
+    }
+
+    var latFraction = (latRad(bounds.lat.max) - latRad(bounds.lat.max)) / Math.PI;
+
+    var lngDiff = bounds.lng.max - bounds.lng.min;
+    var lngFraction = ((lngDiff < 0) ? (lngDiff + 360) : lngDiff) / 360;
+
+    var latZoom = zoom(mapDim.height, WORLD_DIM.height, latFraction);
+    var lngZoom = zoom(mapDim.width, WORLD_DIM.width, lngFraction);
+
+    return Math.min(latZoom, lngZoom, ZOOM_MAX);
+}
+
+var formatModule = function(segments, bounds) {
 	return '' +
 		'<div class="module nearby-segments">' +
-		'<h4>Nearby Segments</h4>' +
+		'<h4>Nearby Segments <a href="" class="hlink">explore...</a></h4>' +
 		'<ul>' +
 		_.map(segments, formatSegment).join('') +
 		'</ul>' +
+		'<p><a href="'+getExploreUrl(bounds)+'">Explore...</a></p>' +
 		'</div>' +
 		'';
 };
@@ -64,7 +107,7 @@ var loadNearbySegmentsSection = function(id) {
 				findNearbySegments(expand(bounds), callback);
 				return;
 			}
-			var content = formatModule(segments);
+			var content = formatModule(segments, bounds);
 			$('.sidebar .module:last').before(content);
 		});	
 	};

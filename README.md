@@ -1,5 +1,11 @@
 # Nearby Segments Chrome Plugin
 
+A plugin for Chrome that adds some extra navigation features for the Strava web app.
+
+Currently this includes:
+* Preventing the explore tab from jumping you back to your home area
+* Adding a list of nearby segments to the right side navigation on segment pages
+
 ## Installing Locally (not from the chrome store)
 
 1. Clone the code locally `git clone `

@@ -14,7 +14,7 @@ var searchForSegments = function(bounds, callback) {
 
 var metersToMiles = function(distance) {
 	return distance * 0.000621371;
-}
+};
 
 var formatSegment = function(s) {
 	return '' +

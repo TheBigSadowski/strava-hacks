@@ -1,39 +1,39 @@
-var searchForSegments = function(bounds, callback) {
-	//TODO: add segment type recognition
-	var url = '/api/v3/segments/search?bounds='+bounds.lat.min+'%2C'+bounds.lng.min+'%2C'+bounds.lat.max+'%2C'+bounds.lng.max+'&min_cat=0&max_cat=5&activity_type=cycling';
-	http.get(url, function(res) {
-		res.body = '';
-		res.setEncoding('utf8');
-		res.on('data', function(chunk) { res.body += chunk; });
-		res.on('end', function() {
-			var results = JSON.parse(res.body);
-			callback(null, results);
-		});
-	});
-};
-
 var metersToMiles = function(distance) {
 	return distance * 0.000621371;
 };
 
-var formatSegment = function(s) {
+var generateSegmentHtml = function(segment) {
 	return '' +
 		'<li>' +
-		'<a href="/segments/'+s.id+'">'+s.name+'</a>' + 
+		'<a href="/segments/'+segment.id+'">'+segment.name+'</a>' + 
 		'<br>' +
-		'<span>'+metersToMiles(s.distance).toFixed(1)+' mi</span> <span>'+s.avg_grade.toFixed(1)+'%</span>' +
+		'<span>'+metersToMiles(segment.distance).toFixed(1)+' mi</span> <span>'+segment.avg_grade.toFixed(1)+'%</span>' +
 		'</li>'; 
+};
+
+var generateModuleHtml = function(segments, bounds) {
+	return '' +
+		'<div class="module nearby-segments">' +
+		'<h4>Nearby Segments</h4>' +
+		'<ul>' +
+		_.map(segments, generateSegmentHtml).join('') +
+		'</ul>' +
+		'<p><a href="'+getExploreUrl(bounds)+'">Explore...</a></p>' +
+		'</div>' +
+		'';
 };
 
 var getExploreUrl = function(bounds) {
 	var lat = (bounds.lat.max+bounds.lat.min)/2;
 	var lng = (bounds.lng.max+bounds.lng.min)/2;
 	var location = $('.location:first').text();
-	var zoom = getBoundsZoomLevel(bounds, { width: 918, height: 618 });
-	return '/segments/explore#location/'+escape(location).replace('%2C', ',')+'/type/cycling/min/0/max/5/surface/undefined/center/'+lat+','+lng+'/zoom/'+zoom+'/map_type/terrain'
+	var zoom = getZoomLevel(bounds);
+	console.log('bounds: '+JSON.stringify(bounds)+' => zoom: '+zoom);
+	return '/segments/explore#location/'+escape(location).replace(/%2C/g, ',')+'/type/cycling/min/0/max/5/surface/undefined/center/'+lat+','+lng+'/zoom/'+zoom+'/map_type/terrain'
 };
 
-function getBoundsZoomLevel(bounds, mapDim) {
+function getZoomLevel(bounds) {
+	var STRAVA_MAP_DIM = { height: 618, width: 918 };
 	var WORLD_DIM = { height: 256, width: 256 };
 	var ZOOM_MAX = 21;
 
@@ -52,23 +52,11 @@ function getBoundsZoomLevel(bounds, mapDim) {
 	var lngDiff = bounds.lng.max - bounds.lng.min;
 	var lngFraction = ((lngDiff < 0) ? (lngDiff + 360) : lngDiff) / 360;
 
-	var latZoom = zoom(mapDim.height, WORLD_DIM.height, latFraction);
-	var lngZoom = zoom(mapDim.width, WORLD_DIM.width, lngFraction);
+	var latZoom = zoom(STRAVA_MAP_DIM.height, WORLD_DIM.height, latFraction);
+	var lngZoom = zoom(STRAVA_MAP_DIM.width, WORLD_DIM.width, lngFraction);
 
 	return Math.min(latZoom, lngZoom, ZOOM_MAX);
 }
-
-var formatModule = function(segments, bounds) {
-	return '' +
-		'<div class="module nearby-segments">' +
-		'<h4>Nearby Segments</h4>' +
-		'<ul>' +
-		_.map(segments, formatSegment).join('') +
-		'</ul>' +
-		'<p><a href="'+getExploreUrl(bounds)+'">Explore...</a></p>' +
-		'</div>' +
-		'';
-};
 
 var expand = function(bounds) {
 	return {
@@ -109,7 +97,7 @@ var loadNearbySegmentsSection = function(id) {
 				findNearbySegments(expand(bounds), callback);
 				return;
 			}
-			var content = formatModule(segments, bounds);
+			var content = generateModuleHtml(segments, bounds);
 			$('.sidebar .module:last').before(content);
 			var exploreUrl = getExploreUrl(bounds);
 			$('a[href="/segments/explore"]').each(function(i, v) { v.href = exploreUrl; });

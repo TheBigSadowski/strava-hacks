@@ -119,6 +119,3 @@ var loadNearbySegmentsSection = function(id) {
 };
 
 loadNearbySegmentsSection($('.starred:first').data('segment-id'));
-
-
-$('a[href="/segments/explore"]')

@@ -23,13 +23,16 @@ var generateModuleHtml = function(segments, bounds) {
 		'';
 };
 
-var getExploreUrl = function(bounds) {
+var getExploreUrl = function(bounds, location) {
 	var lat = (bounds.lat.max+bounds.lat.min)/2;
 	var lng = (bounds.lng.max+bounds.lng.min)/2;
-	var location = $('.location:first').text();
 	var zoom = getZoomLevel(bounds);
-	console.log('bounds: '+JSON.stringify(bounds)+' => zoom: '+zoom);
 	return '/segments/explore#location/'+escape(location).replace(/%2C/g, ',')+'/type/cycling/min/0/max/5/surface/undefined/center/'+lat+','+lng+'/zoom/'+zoom+'/map_type/terrain'
+};
+
+var getSegmentSearchUrl = function(bounds) {
+	// TODO: allow for passing in the activity type so we can search for things other than cycling
+	return '/api/v3/segments/search?bounds='+bounds.lat.min+'%2C'+bounds.lng.min+'%2C'+bounds.lat.max+'%2C'+bounds.lng.max+'&min_cat=0&max_cat=5&activity_type=cycling';
 };
 
 function getZoomLevel(bounds) {
@@ -84,11 +87,12 @@ var determineBounds = function(latlng) {
 	};
 };
 
-var loadNearbySegmentsSection = function(id) {
+var loadNearbySegmentsSection = function(id, locationName) {
 
 	var findNearbySegments = function(bounds, callback) {
-		var url = '/api/v3/segments/search?bounds='+bounds.lat.min+'%2C'+bounds.lng.min+'%2C'+bounds.lat.max+'%2C'+bounds.lng.max+'&min_cat=0&max_cat=5&activity_type=cycling';
+		var url = getSegmentSearchUrl(bounds);
 		$.get(url, function(results) {
+			//console.log(JSON.stringify(results));
 			var segments = _.chain(results.segments)
 				.reject(function(s) { return s.id == id })
 				.take(4)
@@ -99,13 +103,13 @@ var loadNearbySegmentsSection = function(id) {
 			}
 			var content = generateModuleHtml(segments, bounds);
 			$('.sidebar .module:last').before(content);
-			var exploreUrl = getExploreUrl(bounds);
+			var exploreUrl = getExploreUrl(bounds, locationName);
 			$('a[href="/segments/explore"]').each(function(i, v) { v.href = exploreUrl; });
 		});	
 	};
 
 	$.get('/stream/segments/'+id, function(data) {
-		console.log(JSON.stringify(data));
+		//console.log(JSON.stringify(data));
 		var bounds = determineBounds(data.latlng);
 		findNearbySegments(bounds);
 	});

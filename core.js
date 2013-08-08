@@ -83,6 +83,19 @@ var expand = function(bounds) {
 	}
 };
 
+var determineBounds = function(latlng) {
+	return {
+		lat: {
+			min: _.chain(latlng).reject(function(p) { return p == null; }).map(function(p) { return p[0]; }).min().value(),
+			max: _.chain(latlng).reject(function(p) { return p == null; }).map(function(p) { return p[0]; }).max().value()
+		},
+		lng: {
+			min: _.chain(latlng).reject(function(p) { return p == null; }).map(function(p) { return p[1]; }).min().value(),
+			max: _.chain(latlng).reject(function(p) { return p == null; }).map(function(p) { return p[1]; }).max().value()
+		}
+	};
+};
+
 var loadNearbySegmentsSection = function(id) {
 
 	var findNearbySegments = function(bounds, callback) {
@@ -104,16 +117,7 @@ var loadNearbySegmentsSection = function(id) {
 	};
 
 	$.get('/stream/segments/'+id, function(data) {
-		var bounds = {
-			lat: {
-				min: _.chain(data.latlng).reject(function(p) { return p == null; }).map(function(p) { return p[0]; }).min().value(),
-				max: _.chain(data.latlng).reject(function(p) { return p == null; }).map(function(p) { return p[0]; }).max().value()
-			},
-			lng: {
-				min: _.chain(data.latlng).reject(function(p) { return p == null; }).map(function(p) { return p[1]; }).min().value(),
-				max: _.chain(data.latlng).reject(function(p) { return p == null; }).map(function(p) { return p[1]; }).max().value()
-			}
-		}
+		var bounds = determineBounds(data.latlng);
 		findNearbySegments(bounds);
 	});
 };

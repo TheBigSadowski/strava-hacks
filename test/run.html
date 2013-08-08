@@ -6,11 +6,38 @@
   <link rel="stylesheet" href="lib/qunit.css">
 </head>
 <body>
+  <div id="structure" style="display:none">
+
+	<nav class='section-nav'>
+	<a href="/segments/explore">Segment Explore</a>
+	<a href="/segments/search">Segment Search</a>
+	<a href="/activities/search">Activity Search</a>
+	<a href="/athletes/search">Athlete Search</a>
+	<a href="/clubs/search">Clubs</a>
+	</nav>
+
+	<div class='sidebar'>
+	<div class='module' id='performance-goals'>
+	<h2>Set a Goal for this Segment</h2>
+	<div class='module'>
+	This segment is ineligible for a segment goal because it has an
+	average downhill grade of less than -0.25%.
+	</div>
+	</div>
+	<div class='module segment-activity'><h4>Fastest Times</h4></div>
+	<div class='module'>
+	<div class='left'>
+	<a class='button' id='embed'>Embed on Blog</a>
+	</div>
+	</div>
+	</div>
+
+  </div>
   <div id="qunit"></div>
   <div id="qunit-fixture"></div>
   <script src="../lib/jquery.js"></script>
   <script src="../lib/underscore.js"></script>
-  <script src="../init.js"></script>
+  <script src="../core.js"></script>
   <script src="lib/qunit.js"></script>
   <script src="tests.js"></script>
 </body>

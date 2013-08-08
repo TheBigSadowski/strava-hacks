@@ -92,7 +92,6 @@ var loadNearbySegmentsSection = function(id, locationName) {
 	var findNearbySegments = function(bounds, callback) {
 		var url = getSegmentSearchUrl(bounds);
 		$.get(url, function(results) {
-			//console.log(JSON.stringify(results));
 			var segments = _.chain(results.segments)
 				.reject(function(s) { return s.id == id })
 				.take(4)
@@ -109,7 +108,6 @@ var loadNearbySegmentsSection = function(id, locationName) {
 	};
 
 	$.get('/stream/segments/'+id, function(data) {
-		//console.log(JSON.stringify(data));
 		var bounds = determineBounds(data.latlng);
 		findNearbySegments(bounds);
 	});

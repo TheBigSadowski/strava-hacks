@@ -58,7 +58,7 @@ function getZoomLevel(bounds) {
 	return Math.min(latZoom, lngZoom, ZOOM_MAX);
 }
 
-var expand = function(bounds) {
+var expandBounds = function(bounds) {
 	return {
 		lat: {
 			min: bounds.lat.min - 0.005,
@@ -87,14 +87,14 @@ var determineBounds = function(latlng) {
 var loadNearbySegmentsSection = function(id) {
 
 	var findNearbySegments = function(bounds, callback) {
-		var url = '/api/v3/segments/search?bounds='+bounds.lat.min+'%2C'+bounds.lng.min+'%2C'+bounds.lat.max+'%2C'+bounds.lng.max+'&zoom=15&min_cat=0&max_cat=5&activity_type=cycling';
+		var url = '/api/v3/segments/search?bounds='+bounds.lat.min+'%2C'+bounds.lng.min+'%2C'+bounds.lat.max+'%2C'+bounds.lng.max+'&min_cat=0&max_cat=5&activity_type=cycling';
 		$.get(url, function(results) {
 			var segments = _.chain(results.segments)
 				.reject(function(s) { return s.id == id })
 				.take(4)
 				.value();
 			if (segments.length < 3) {
-				findNearbySegments(expand(bounds), callback);
+				findNearbySegments(expandBounds(bounds), callback);
 				return;
 			}
 			var content = generateModuleHtml(segments, bounds);
@@ -105,6 +105,7 @@ var loadNearbySegmentsSection = function(id) {
 	};
 
 	$.get('/stream/segments/'+id, function(data) {
+		console.log(JSON.stringify(data));
 		var bounds = determineBounds(data.latlng);
 		findNearbySegments(bounds);
 	});
